@@ -160,6 +160,10 @@ TARGET_KERNEL_CROSS_COMPILE_PREFIX := aarch64-linux-android-
 TARGET_KERNEL_HEADER_ARCH := arm64
 TARGET_USES_UNCOMPRESSED_KERNEL := true
 TARGET_KERNEL_CONFIG := m8qlul_vz_defconfig
+
+# Extended filesystem support
+TARGET_EXFAT_DRIVER := sdfat
+
 ENABLE_CPUSETS := true
 # }}}
 
@@ -230,10 +234,7 @@ BOARD_HAS_NO_SELECT_BUTTON := true
 BOARD_RECOVERY_SWIPE := true
 BOARD_USE_CUSTOM_RECOVERY_FONT := \"roboto_23x41.h\"
 BOARD_USES_MMCUTILS := true
-TARGET_RECOVERY_UPDATER_LIBS := librecovery_updater_m8qlul
-ifneq ($(WITH_TWRP),true)
 TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/rootdir/etc/fstab.qcom
-endif
 TARGET_RECOVERY_PIXEL_FORMAT := "RGB_565"
 TARGET_RECOVERY_DENSITY := xxhdpi
 TARGET_USERIMAGES_USE_EXT4 := true
@@ -301,4 +302,3 @@ WPA_SUPPLICANT_VERSION := VER_0_8_X
 -include vendor/htc/m8qlul/BoardConfigVendor.mk
 # }}}
 
-# vim: ts=4 sw=4 sts=4 et fdm=marker ft=make
