@@ -1,7 +1,5 @@
-# vim: ts=4 sw=4 sts=4 ft=sh fdm=marker
-#
-# Copyright blah, 2015. All rights derped.  {{{
-# We are the borg, you will be assimilated.
+# Copyright (C) 2015 The CyanogenMod Project
+# Copyright (C) 2017-2018 The LineageOS Project
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -26,14 +24,8 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-# }}}
-
-
-# Boot stages   {{{
 
 on init
-    # {{{
-
     # Create cgroup mount points for timer groups
     mkdir /dev/timer_group
     mount cgroup none /dev/timer_group timer_slack
@@ -50,34 +42,6 @@ on init
     chmod 0660 /dev/timer_group/bg/cgroup.procs
     chmod 0660 /dev/timer_group/bg/tasks
     write /dev/timer_group/bg/timer_slack.min_slack_ns 100000000
-
-    # init PnPMgr node
-    chmod 0664 /sys/power/pnpmgr/apps/media_mode
-    chown media system /sys/power/pnpmgr/apps/media_mode
-    chown system /sys/power/pnpmgr/apps/activity_trigger
-    chown system /sys/power/pnpmgr/apps/non_activity_trigger
-    chown system /sys/power/pnpmgr/launch_event
-    chown system /sys/power/powersave
-    chown system /sys/power/pnpmgr/cluster/big/user_perf_lvl
-    chown system /sys/power/pnpmgr/cluster/big/user_lvl_to_min_freq
-    chown system /sys/power/pnpmgr/cluster/big/hotplug/user_cpunum_max
-    chown system /sys/power/pnpmgr/cluster/big/hotplug/user_cpunum_min
-    chown system /sys/power/pnpmgr/cluster/little/user_perf_lvl
-    chown system /sys/power/pnpmgr/cluster/little/user_lvl_to_min_freq
-    chown system /sys/power/pnpmgr/cluster/little/hotplug/user_cpunum_max
-    chown system /sys/power/pnpmgr/cluster/little/hotplug/user_cpunum_min
-    chown system /sys/power/pnpmgr/touch_boost
-    chown system /sys/power/pnpmgr/long_duration_touch_boost
-    chown system /sys/power/wait_for_fb_status
-
-    write /sys/power/pnpmgr/cluster/big/hotplug/mp_cpunum_max 4
-    write /sys/power/pnpmgr/cluster/big/hotplug/mp_cpunum_min 1
-    write /sys/power/pnpmgr/cluster/little/hotplug/mp_cpunum_max 4
-    write /sys/power/pnpmgr/cluster/little/hotplug/mp_cpunum_min 0
-    write /sys/power/pnpmgr/thermal/cpu_asn 0
-    write /sys/power/pnpmgr/apps/activity_trigger "booting"
-    write /sys/power/pnpmgr/touch_boost_duration 3000
-    write /sys/power/pnpmgr/long_duration_touch_boost_duration 3000
 
     # HTC SSD Battery - BEGIN
     chown system system /sys/class/power_supply/battery/full_level_dis_batt_chg
@@ -109,22 +73,13 @@ on init
     chown root system /sys/devices/system/cpu/cpu7/online
     chmod 0664 /sys/devices/system/cpu/cpu7/online
 
-    chown root system /sys/power/pnpmgr/thermal/cpu_asn
-    chmod 0664 /sys/power/pnpmgr/thermal/cpu_asn
-
-    chown system system /sys/power/pnpmgr/apps/trace_trigger
-    chmod 0664 /sys/power/pnpmgr/apps/trace_trigger
-
     # Enable KSM following Google's guidelines:
     # https://source.android.com/devices/tech/config/low-ram.html
     write /sys/kernel/mm/ksm/pages_to_scan 100
     write /sys/kernel/mm/ksm/sleep_millisecs 500
     write /sys/kernel/mm/ksm/run 1
 
-    # }}}
-
 on post-fs
-    # {{{
 
     chown system carrier /carrier
     chmod 0771 /carrier
@@ -136,20 +91,11 @@ on post-fs
     chown root system /proc/driver/hdf
     chmod 0664 /proc/driver/hdf
 
-    # Probably the htc log daemon. We won't need it.
-    # start hld
-
-    # }}}
-
 on post-fs-data
-    # {{{
 
     mkdir /dev/radio 0770 radio radio
 
-    # }}}
-
 on boot
-    # {{{
 
     ## HTC_PROCESS_DEBUG file to maintain the monitoring process list, change owner to system
     chown system /sys/process/task_comm_list
@@ -220,17 +166,6 @@ on boot
     # For bridgemgr daemon to inform the USB driver of the correct transport
     chown radio radio /sys/class/android_usb/f_rmnet_smd_sdio/transport
 
-    # Set the console loglevel to < KERN_INFO
-    # Set the default message loglevel to KERN_INFO
-    # write /proc/sys/kernel/printk "6 6 1 7"
-
-    # End boot stages }}}
-
-# End boot stages }}}
-
-
-# Services {{{
-
 # Bluetooth experimental daemon to connect with Samsung's Gear smartwatches.
 # Source is actually at https://git.javispedro.com/cgit/sapd.git
 service bt-sap /system/bin/sapd 15
@@ -240,25 +175,8 @@ service bt-sap /system/bin/sapd 15
     disabled
     oneshot
 
-# bugreport is triggered by the KEY_VOL-UP and KEY_VOL-DOWN keycodes
-service bugreport /system/bin/dumpstate -d -p -B \
- -o /data/data/com.android.shell/files/bugreports/bugreport
-    disabled
-    cgroup bg
-    oneshot
-    keycodes 114 115
-
 service charger /charger
     class charger
-
-service rootagent /system/bin/sh /system/etc/init.qcom.rootagent.sh
-    disabled
-    oneshot
-
-# End services }}}
-
-
-# Properties {{{
 
 on property:bluetooth.sap.status=running
     start bt-sap
@@ -286,4 +204,3 @@ on property:persist.usb.chgdisabled=1
 on property:persist.usb.chgdisabled=0
     write /sys/class/power_supply/battery/charging_enabled 1
 
-# }}}
